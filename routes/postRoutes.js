@@ -6,9 +6,9 @@ const postController = require('../controller/postController.js');
 
 const router = express.Router();
 const uploadMiddleware = multer({ dest: './uploads' })
-router.post('/', authMiddleware, uploadMiddleware.single('file'), postController.createPost);
+router.post('/', uploadMiddleware.single('file'), postController.createPost);
 
-router.put('/', authMiddleware, uploadMiddleware.single('file'), postController.updatePost);
+router.put('/', uploadMiddleware.single('file'), postController.updatePost);
 
 router.get('/', postController.getPosts);
 

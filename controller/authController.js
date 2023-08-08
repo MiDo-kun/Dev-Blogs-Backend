@@ -26,9 +26,11 @@ const login = async (req, res) => {
     // logged in
     jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
       if (err) throw err;
-      res.cookie('token', token, { maxAge: 7 * 24 * 60 * 60 * 1000 }).json({
+      res.json({
         id: userDoc._id,
         username,
+        token,
+        maxAge: 7 * 24 * 60 * 60 * 1000
       });
     });
   } else {
@@ -40,8 +42,4 @@ const profile = (req, res) => {
   res.status(200).json(req.user);
 };
 
-const logout = (req, res) => {
-  res.cookie('token', '').json('ok');
-};
-
-module.exports = { register, login, profile, logout };
+module.exports = { register, login, profile };

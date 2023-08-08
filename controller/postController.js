@@ -1,4 +1,4 @@
-require('dotenv').config({ path:`${__dirname}/../.env`});
+require('dotenv').config({ path: `${__dirname}/../.env` });
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
@@ -12,7 +12,7 @@ const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 cloudinary.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET 
+  api_secret: CLOUDINARY_API_SECRET
 });
 
 const createPost = async (req, res) => {
@@ -32,7 +32,7 @@ const createPost = async (req, res) => {
   });
 
   // delete the uploaded file from the server
-  fs.unlinkSync(req.file.path);
+  fs.unlinkSync(`../${req.file.path}`);
 
   res.json(postDoc);
 };
@@ -49,6 +49,8 @@ const updatePost = async (req, res) => {
     newPath = result.secure_url;
 
     // delete the old file from the server
+    console.log(__dirname);
+    console.log(req.file.path);
     fs.unlinkSync(req.file.path);
   }
 
@@ -64,6 +66,21 @@ const updatePost = async (req, res) => {
   res.json(postDoc);
 };
 
+const deletePostById = async (req, res) => {
+  const postId = req.params.id; 
+
+  try {
+    const deletedPost = await Post.findByIdAndDelete(postId);
+    if (!deletedPost)
+      return res.status(404).json({ error: "Post not found" });
+
+    res.status(200).json({ message: "Post deleted successfully", deletedPost });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while deleting the post" });
+  }
+}
+
 const getPosts = async (req, res) => {
   const posts = await Post.find()
     .populate('author', ['username'])
@@ -78,4 +95,4 @@ const getPostById = async (req, res) => {
   res.json(postDoc);
 };
 
-module.exports = { createPost, updatePost, getPosts, getPostById, };
+module.exports = { createPost, updatePost, deletePostById, getPosts, getPostById, };

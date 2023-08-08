@@ -3,7 +3,6 @@ require('dotenv').config({ path: `${__dirname}/.env` });
 const express = require('express');
 const cors = require('cors');
 const mongoose = require("mongoose");
-const cookieParser = require('cookie-parser');
 
 const authRoutes = require('./routes/authRoutes');
 const postRoutes = require('./routes/postRoutes');
@@ -19,7 +18,6 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.static('public'));
-app.use(cookieParser());
 app.use('/uploads', express.static('./public'));
 
 const MONGODB_URI = process.env.MONGODB_URI;

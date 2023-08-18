@@ -2,11 +2,15 @@ const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
 const PostSchema = new Schema({
+  _id: Schema.Types.ObjectId,
   title: String,
   summary: String,
   content: String,
   cover: String,
-  author: { type: Schema.Types.ObjectId, ref: 'User' },
+  comments: [{ // One to Many Relationship
+    type: Schema.Types.ObjectId,
+    ref: 'Comment'
+  }]
 }, {
   timestamps: true,
 });

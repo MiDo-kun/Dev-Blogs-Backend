@@ -1,15 +1,16 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { default: mongoose } = require('mongoose');
 
 const User = require('../models/User');
-const { salt, secret } = require('../utils/constants');
+const { SALT, SECRET } = require('../utils/config.js');
 
 const register = async (req, res) => {
-  const { username, password } = req.body;
   try {
     const userDoc = await User.create({
+      _id: new mongoose.Types.ObjectId,
       username,
-      password: bcrypt.hashSync(password, salt),
+      password: bcrypt.hashSync(password, SALT),
     });
     res.json(userDoc);
   } catch (e) {
@@ -24,7 +25,7 @@ const login = async (req, res) => {
   const passOk = bcrypt.compareSync(password, userDoc.password);
   if (passOk) {
     // logged in
-    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
+    jwt.sign({ username, id: userDoc._id }, SECRET, {}, (err, token) => {
       if (err) throw err;
       res.json({
         id: userDoc._id,

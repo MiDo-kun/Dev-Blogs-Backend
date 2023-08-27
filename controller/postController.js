@@ -2,7 +2,7 @@ require('dotenv').config({ path: `${__dirname}/../.env` });
 const { default: mongoose } = require('mongoose');
 
 const Post = require('../models/Post');
-const { uploadImage, removeImage } = require('../utils/cloudinary.js');
+const { uploadImage, removeImage } = require('../config/cloudinary.js');
 
 async function createPost(req, res) {
   const { title, summary, content } = req.body; // JSON Data
@@ -39,14 +39,14 @@ async function updatePost(req, res) {
       removeImage(id);
     }
 
-    const postDoc = await Post
-      .findById(id)
-      .update({
-        title,
-        summary,
-        content,
-        cover: newPath ? newPath : postDoc.cover,
-      })
+    const postDoc = await Post.findById(id);
+    await postDoc.update({
+      title,
+      summary,
+      content,
+      cover: newPath ? newPath : postDoc.cover,
+    })
+
     return res.status(200).json(postDoc)
   } catch (err) {
     console.error(err)
@@ -69,22 +69,27 @@ async function deletePostById(req, res) {
 
 async function getPosts(req, res) {
   const paginateOptions = {
+    title: req.query.search || '',
     page: parseInt(req.query.page, 10) || 0,
     limit: parseInt(req.query.limit, 10) || 5
   }
 
   try {
-    const postDoc = await Post.find()
-      .skip(paginateOptions.page * paginateOptions.limit)
-      .limit(paginateOptions.limit)
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'replies',
-        },
-        select: '_id comment replies'
-      }).select('-__v -updatedAt'); // -(dash) means exclude 
-    return res.status(200).json(postDoc);
+    const titleRegex = new RegExp(paginateOptions.title, 'i'); // Case-insensitive search regex
+    const [matchingPosts, totalCount] = await Promise.all([
+      Post.find({ title: titleRegex })
+        .skip(paginateOptions.page * paginateOptions.limit)
+        .limit(paginateOptions.limit)
+        .select('id title cover content createdAt'),
+      Post.countDocuments({ title: titleRegex }), // Count matching documents
+    ]);
+
+    return res.status(200).json({
+      total: totalCount,
+      page: paginateOptions.page,
+      limit: paginateOptions.limit,
+      posts: matchingPosts,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ "message": "Request Failed." });
@@ -96,12 +101,7 @@ async function getPostById(req, res) {
 
   try {
     const postDoc = await Post.findById(postId)
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'replies'
-        }
-      })
+      .select('-comments -createdAt -__v -author');
 
     return res.status(200).json(postDoc);
   } catch (err) {

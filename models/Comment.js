@@ -3,7 +3,11 @@ const { Schema, model } = mongoose;
 
 const commentSchema = new Schema({
   _id: Schema.Types.ObjectId, // Primary Key
-  post: { // One to one relationship - One post and One Comment
+  user: {
+    type: String,
+    ref: 'User'
+  },
+  post: { // One to one relationship - One post to One Comment
     type: Schema.Types.ObjectId,
     ref: 'Post' // Foreign Key
   },
@@ -13,8 +17,10 @@ const commentSchema = new Schema({
   },
   replies: [{
     type: Schema.Types.ObjectId, // Store a collection of foreign key here
-    ref: 'Reply'
+    ref: 'Reply' // Referenced to reply collections
   }]
+}, {
+  timestamps: true
 });
 
 const Comment = model('Comment', commentSchema);

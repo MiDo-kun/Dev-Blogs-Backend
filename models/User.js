@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
+// Todo: Add Roles
 const UserSchema = new Schema({
-  _id: Schema.Types.ObjectId,
-  username: { type: String, required: true, min: 4, unique: true },
-  password: { type: String, required: true },
+  // Add roles, profile, email
+  _id: String,
+  role: {
+    type: String,
+    enum: ['admin', 'subscriber'],
+  },
+  name: String,
+  photo: String,
 });
 
 const UserModel = model('User', UserSchema);

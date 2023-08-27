@@ -1,17 +1,20 @@
-require('dotenv').config({ path: `${__dirname}/.env` });
 
 const jwt = require('jsonwebtoken');
-const secret = process.env.JWT_SECRET;
+const { SECRET } = require('../config/env-variables');
 
 const authMiddleware = (req, res, next) => {
   const token = (req.headers.authorization).split(' ')[1];
   try {
-    jwt.verify(token, secret, {}, (err, decoded) => {
+    jwt.verify(token, SECRET, {}, (err, decoded) => {
       if (err) {
-        return res.status(401).json({ message: 'User Unauthorized' });
+        // Return role and id
+        return res.status(401).json({
+          '_id': 0,
+          'user': false 
+        });
       }
-
-      req.user = decoded;
+      // Add or Modify Authenticated User Object
+      req.authenticatedUser = decoded;
       next();
     });
   } catch (err) {

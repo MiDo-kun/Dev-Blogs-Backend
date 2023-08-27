@@ -23,6 +23,6 @@ router.delete("/:postId/comment/:commentId", authMiddleware, commentController.r
 // <-- REPLY ROUTES --> //
 router.get("/:postId/comment/:commentId", commentController.getReplies)
 router.post("/:postId/comment/:commentId/reply/", authMiddleware, commentController.replyComment);
-router.delete("/:id/comment/:commentId/reply/:replyId", authMiddleware, commentController.removeCommentById);
+router.delete("/:id/comment/:commentId/reply/:replyId", authMiddleware, commentController.removeReply);
 
 module.exports = router;

@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 const { default: mongoose } = require('mongoose');
 
 const User = require('../models/User');
-const { SALT, SECRET } = require('../utils/config.js');
+const { SALT, SECRET, FRONT_END_URL } = require('../config/env-variables.js');
 
-const register = async (req, res) => {
+async function register(req, res) {
   try {
     const userDoc = await User.create({
       _id: new mongoose.Types.ObjectId,
@@ -14,12 +14,11 @@ const register = async (req, res) => {
     });
     res.json(userDoc);
   } catch (e) {
-    console.log(e);
     res.status(400).json(e);
   }
 };
 
-const login = async (req, res) => {
+async function login(req, res) {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
   const passOk = bcrypt.compareSync(password, userDoc.password);
@@ -39,8 +38,26 @@ const login = async (req, res) => {
   }
 };
 
-const profile = (req, res) => {
-  res.status(200).json(req.user);
+function profile(req, res) {
+  res.status(200).json({
+    _id: req.authenticatedUser._id,
+    user: req.authenticatedUser.role
+  })
 };
 
-module.exports = { register, login, profile };
+function googleCallBack(req, res) {
+  try {
+    const token = jwt.sign({
+      _id: req.user._id,
+      role: req.user.role,
+      name: req.user.name,
+      photo: req.user.photo
+    }, SECRET, { expiresIn: '5h' })
+    res.redirect(`${FRONT_END_URL}/success?token=${token}`);
+  } catch (err) {
+    res.status(500).json({ "message": "Request Failed." })
+  }
+}
+
+
+module.exports = { register, login, profile, googleCallBack };

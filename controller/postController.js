@@ -80,6 +80,7 @@ async function getPosts(req, res) {
       Post.find({ title: titleRegex })
         .skip(paginateOptions.page * paginateOptions.limit)
         .limit(paginateOptions.limit)
+        .sort({ updatedAt: -1 })
         .select('id title cover content createdAt'),
       Post.countDocuments({ title: titleRegex }), // Count matching documents
     ]);

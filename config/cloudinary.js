@@ -20,8 +20,7 @@ async function uploadImage(id, image) {
   });
 
   // Remove cover from the upload folder
-  fs.unlinkSync(`${__dirname}\\..\\${image}`);
-
+  fs.unlinkSync(`${__dirname}/../${image}`);
   return result.secure_url;
 }
 
